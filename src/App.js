@@ -98,7 +98,7 @@ function App() {
   return (
     <DragDropContext onDragEnd={onDragEnd}>
       <div className="flex flex-col">
-        <h3 className="text-xl">Tasks</h3>
+        <div className="text-2xl test">Tasks</div>
         <div className="flex justify-between ">
           {items.map((item) => (
             <div

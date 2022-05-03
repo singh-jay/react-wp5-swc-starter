@@ -8,17 +8,19 @@ const tailwindcss = require('tailwindcss');
 const autoprefixer = require('autoprefixer');
 const ReactRefreshWebpackPlugin = require('@pmmmwh/react-refresh-webpack-plugin');
 
-const isDevelopment = process.env.NODE_ENV !== 'production';
-
+const devMode = process.env.NODE_ENV !== 'production';
 module.exports = {
-  mode: isDevelopment ? 'development' : 'production',
+  mode: devMode ? 'development' : 'production',
+  entry: './src/index.js',
   // Where files should be sent once they are bundled
   output: {
-    path: path.resolve(__dirname, 'build'),
     filename: 'bundle.js',
+    path: path.resolve(__dirname, 'build'),
+    clean: true,
   },
-  // webpack 5 comes with devServer which loads in development mode
+  devtool: devMode ? 'inline-source-map' : 'source-map',
 
+  // webpack 5 comes with devServer which loads in development mode
   devServer: {
     proxy: {
       // proxy URLs to backend development server
@@ -30,16 +32,49 @@ module.exports = {
     historyApiFallback: true, // true for index.html upon 404, object for multiple paths
     hot: true, // hot module replacement. Depends on HotModuleReplacementPlugin
     https: false, // true for self-signed, object for cert authority
+    open: true, // open the browser after server had been started
+  },
+  optimization: {
+    splitChunks: {
+      cacheGroups: {
+        styles: {
+          name: 'styles',
+          type: 'css/mini-extract',
+          chunks: 'all',
+          enforce: true,
+        },
+      },
+    },
+    minimizer: [
+      // For webpack@5 you can use the `...` syntax to extend existing minimizers (i.e. `terser-webpack-plugin`), uncomment the next line
+      `...`,
+      new CssMinimizerPlugin(),
+    ],
   },
   // Rules of how webpack will take our files, complie & bundle them for the browser
   module: {
     rules: [
       {
-        test: /\.jsx?$/,
+        test: /\.[jt]sx?$/,
         exclude: /(node_modules|bower_components)/,
         use: {
           // `.swcrc` in the root can be used to configure swc
           loader: 'swc-loader',
+          options: {
+            // minify: true,
+            jsc: {
+              parser: {
+                syntax: 'ecmascript',
+                jsx: true,
+                dynamicImport: true,
+              },
+              transform: {
+                react: {
+                  refresh: devMode,
+                },
+              },
+            },
+          },
         },
       },
       {
@@ -53,13 +88,16 @@ module.exports = {
       },
       // {
       //   test: /\.css/i,
-      //   use: [MiniCssExtractPlugin.loader, 'css-loader'],
+      //   use: [
+      //     devMode ? 'style-loader' : MiniCssExtractPlugin.loader,
+      //     'css-loader',
+      //   ],
       // },
       // {
       //   test: /\.s[ac]ss$/i,
       //   use: [
       //     // Creates `style` nodes from JS strings
-      //     MiniCssExtractPlugin.loader,
+      //     devMode ? "style-loader" : MiniCssExtractPlugin.loader,
       //     // Translates CSS into CommonJS
       //     'css-loader',
       //     // Compiles Sass to CSS
@@ -70,7 +108,7 @@ module.exports = {
       {
         test: /\.(css|s[ac]ss)$/i,
         use: [
-          MiniCssExtractPlugin.loader,
+          devMode ? 'style-loader' : MiniCssExtractPlugin.loader,
           'css-loader',
           'sass-loader',
           {
@@ -84,19 +122,31 @@ module.exports = {
           },
         ],
       },
+      {
+        test: /\.(png|svg|jpg|jpeg|gif)$/i,
+        type: 'asset/resource',
+      },
+      {
+        test: /\.(woff|woff2|eot|ttf|otf)$/i,
+        type: 'asset/resource',
+      },
     ],
   },
   plugins: [
-    isDevelopment && new ReactRefreshWebpackPlugin(),
+    devMode && new ReactRefreshWebpackPlugin(),
     new HTMLWebpackPlugin({
       filename: './index.html',
       template: path.join(__dirname, 'public/index.html'),
     }),
-    new MiniCssExtractPlugin({
-      filename: 'styles/[name].[contenthash].css',
-      chunkFilename: '[id].[contenthash].css',
-    }),
-    new CssMinimizerPlugin(),
+    !devMode &&
+      new MiniCssExtractPlugin({
+        // For long term caching use filename: "[contenthash].css"
+        filename: devMode
+          ? 'styles/[name].css'
+          : 'styles/[name].[contenthash].css',
+        chunkFilename: devMode ? '[id].css' : '[id].[contenthash].css',
+      }),
+    // new CssMinimizerPlugin(),
     // new CopyPlugin({
     //   patterns: [
     //     {
