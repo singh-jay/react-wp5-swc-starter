@@ -10,8 +10,6 @@ WORKDIR /node
 COPY package*.json ./
 RUN npm config list
 RUN npm ci && npm cache clean --force
-ENV PATH /node/node_modules/.bin:$PATH
-CMD ["npm", "start"]
 
 FROM base as dev
 ENV NODE_ENV=development
@@ -36,9 +34,13 @@ RUN chmod +x /microscanner
 RUN /microscanner $MICROSCANNER_TOKEN --continue-on-failure
 
 FROM base as pre-prod
+ENV NODE_ENV=development
+ENV PATH /node/node_modules/.bin:$PATH
+WORKDIR /node
+RUN npm config list
+RUN npm ci && npm cache clean --force
 WORKDIR /node/app
 COPY . .
-ENV PATH /node/app/node_modules/.bin:$PATH
 RUN npm run build
 
 FROM nginx:1.21.6-alpine as prod
