@@ -38,6 +38,7 @@ RUN /microscanner $MICROSCANNER_TOKEN --continue-on-failure
 FROM base as pre-prod
 WORKDIR /node/app
 COPY . .
+ENV PATH /node/node_modules/.bin:$PATH
 RUN npm run build
 
 FROM nginx:1.21.6-alpine as prod
