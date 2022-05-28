@@ -13,6 +13,7 @@ RUN npm ci && npm cache clean --force
 
 FROM base as dev
 ENV NODE_ENV=development
+ENV PATH /node/node_modules/.bin:$PATH
 # RUN apt-get update -qq && apt-get install -qy \ 
 #     ca-certificates \
 #     bzip2 \
@@ -20,9 +21,9 @@ ENV NODE_ENV=development
 #     libfontconfig \
 #     --no-install-recommends
 RUN npm config list
-RUN npm install --only=development && npm cache clean --force
+RUN npm ci && npm cache clean --force
 WORKDIR /node/app
-USER node
+# USER node
 
 FROM dev as test
 COPY . .
@@ -33,13 +34,7 @@ USER root
 RUN chmod +x /microscanner
 RUN /microscanner $MICROSCANNER_TOKEN --continue-on-failure
 
-FROM base as pre-prod
-ENV NODE_ENV=development
-ENV PATH /node/node_modules/.bin:$PATH
-WORKDIR /node
-RUN npm config list
-RUN npm ci && npm cache clean --force
-WORKDIR /node/app
+FROM dev as pre-prod
 COPY . .
 RUN npm run build
 
