@@ -1,4 +1,4 @@
-FROM node:16.14.0-buster-slim as base
+FROM node:16.15.0-buster-slim as base
 LABEL org.opencontainers.image.authors=jaysingh4797@gmail.com
 LABEL org.opencontainers.image.title="SWC-WP5"
 LABEL org.opencontainers.image.licenses=MIT
@@ -40,7 +40,7 @@ WORKDIR /node/app
 COPY . .
 RUN npm run build
 
-FROM nginx:1.21.5-alpine as prod
+FROM nginx:1.21.6-alpine as prod
 EXPOSE 3000
 COPY nginx/nginx.conf /etc/nginx/conf.d/default.conf
 COPY --from=pre-prod /node/app/build /usr/share/nginx/html
