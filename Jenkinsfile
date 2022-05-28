@@ -8,12 +8,12 @@ pipeline{
 
 	stages {
 
-		// stage('Build') {
+		stage('Build') {
 
-		// 	steps {
-		// 		sh 'docker build --target prod -t singhjay/swc-wp5:latest .'
-		// 	}
-		// }
+			steps {
+				sh 'docker build --target prod -t singhjay/swc-wp5:latest .'
+			}
+		}
 
 		stage('Login') {
 
