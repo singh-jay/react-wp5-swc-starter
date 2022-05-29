@@ -10,7 +10,7 @@ def getBuildUser() {
 pipeline{
 
 	agent any
-	
+
 	// Set up local variables for your pipeline
 	environment {
 		DOCKERHUB_CREDENTIALS=credentials('singhjay_dockerhub')
@@ -20,12 +20,12 @@ pipeline{
 
 	stages {
 
-		// stage('Build') {
+		stage('Build') {
 
-		// 	steps {
-		// 		sh 'docker build --target prod -t singhjay/swc-wp5:latest .'
-		// 	}
-		// }
+			steps {
+				sh 'docker build --target prod -t singhjay/swc-wp5:latest .'
+			}
+		}
 
 		stage('Login') {
 
