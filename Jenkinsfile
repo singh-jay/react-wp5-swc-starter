@@ -62,13 +62,13 @@ pipeline{
     post {
         always {
 			// sh 'docker logout'
-            script {
-                BUILD_USER = getBuildUser()
-            }
+            // script {
+            //     BUILD_USER = getBuildUser()
+            // }
             echo 'I will always say hello in the console.'
             slackSend channel: '#automation',
                 color: COLOR_MAP[currentBuild.currentResult],
-                message: "*${currentBuild.currentResult}:* Job ${env.JOB_NAME} build ${env.BUILD_NUMBER} by ${BUILD_USER}\n More info at: ${env.BUILD_URL}"
+                message: "*${currentBuild.currentResult}:* Job ${env.JOB_NAME} build ${env.BUILD_NUMBER} by Admin\n More info at: ${env.BUILD_URL}"
         }
     }
 	// post {
